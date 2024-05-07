@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Watchlist</h2>
+
+    <div class="container-fluid">
+        <div class="row">
+            {% for listing in watchlist %}
+                <a class="card bg-light col-2" style="color: black; margin: 8px; text-decoration: none;" href="{% url 'view-listing' listing.id %}">
+                    <img class="card-img-top" src="{{ listing.photo }}" alt="{{ listing.photo }}">
+                    <div class="card-title text-center"><h4>{{ listing.title }}</h4></div>
+                    <div class="card-subtitle text-center"><h6><strong>Highest Bid: </strong>{{ listing.pretty_price }}</h6></div>
+                    <div class="card-body">{{ listing.description }}</div>
+                </a>
+            {% empty %}
+                <div class="alert alert-primary col">
+                    You aren't watching any items.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

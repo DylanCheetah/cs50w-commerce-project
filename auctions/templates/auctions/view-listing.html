@@ -1,0 +1,89 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<img src="{{ listing.photo }}" alt="{{ listing.photo }}" width="50%">
+<h2>{{ listing.title }}</h2>
+{% if is_watching %}
+    <form action="{% url 'unwatch' listing.id %}" method="post" style="margin: 8px;">
+        {% csrf_token %}
+        <input class="btn btn-danger" type="submit" value="Unwatch">
+    </form>
+{% else %}
+    <form action="{% url 'watch' listing.id %}" method="post" style="margin: 8px;">
+        {% csrf_token %}
+        <input class="btn btn-success" type="submit" value="Watch">
+    </form>
+{% endif %}
+{% if user == listing.seller and listing.is_active %}
+    <form action="{% url 'close-bidding' listing.id %}" method="post">
+        {% csrf_token %}
+        <input class="btn btn-danger" type="submit" value="Close Bidding">
+    </form>
+{% endif %}
+<div>
+    <strong>Sold By:</strong> {{ listing.seller }}
+</div>
+<div>
+    <strong>Price:</strong> {{ listing.pretty_price }}
+</div>
+<div>
+    <strong>Description:</strong>
+</div>
+<p>
+    {{ listing.description }}
+</p>
+<hr>
+<h2>Bids</h2>
+{% if listing.is_active %}
+    {% if bid_error %}
+        <div class="alert alert-danger">
+            {{ bid_error }}
+        </div>
+    {% endif %}
+    <form action="{% url 'bid' listing.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input class="form-control" type="number" name="amount" minvalue="{{ listing.price }}" step=".01" placeholder="Bid" required>
+        </div>
+        <div class="form-group">
+            <input class="btn btn-primary" type="submit" value="Place Bid">
+        </div>
+    </form>
+{% elif user == listing.bids.last.user %}
+    <div class="alert alert-success">
+        Congratulations! You have placed the winning bid for this item!
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Bidding is closed.
+    </div>
+{% endif %}
+<hr>
+<h2>Comments</h2>
+{% if user.is_authenticated %}
+    <form action="{% url 'add-comment' listing.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input class="form-control" type="text" name="text" maxlength="256" placeholder="Comment" required>
+        </div>
+        <div class="form-group">
+            <input class="btn btn-primary" type="submit" value="Comment">
+        </div>
+    </form>
+{% endif %}
+<div class="container-fluid">
+    {% for comment in comments %}
+        <div class="row">
+            <div class="card col bg-light">
+                <div class="card-title"><h5>{{ comment.user }}</h5></div>
+                <div class="card-subtitle"><h6>{{ comment.date }}</h6></div>
+                <div class="card-body"><p>{{ comment.text }}</p></div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-primary">
+            No comments.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
